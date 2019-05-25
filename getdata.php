@@ -32,6 +32,7 @@ function CallAPI($method, $url, $data = false)
 
     return $result;
 }
-$data = CallAPI('GET', 'https://api.binance.com/api/v1/trades?symbol=ETHBTC&limit=1');
-echo $data
+$data = CallAPI('GET', 'https://api.binance.com/api/v3/ticker/price');
+
+print_r($data);
 ?>
