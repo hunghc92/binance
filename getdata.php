@@ -1,4 +1,27 @@
 <?php
+session_start();
+date_default_timezone_set('Europe/London');
+
+function cmp($a, $b)
+{
+	$result = 0;
+	if ($a->p > $b->p) {
+		$result = 1;
+	} else if ($a->p < $b->p) {
+		$result = -1;
+	}
+	return $result;
+}
+
+function endsWith($string, $endString) 
+{ 
+    $len = strlen($endString); 
+    if ($len == 0) { 
+        return true; 
+    } 
+    return (substr($string, -$len) === $endString); 
+}
+
 function CallAPI($method, $url, $data = false)
 {
     $curl = curl_init();
@@ -32,7 +55,58 @@ function CallAPI($method, $url, $data = false)
 
     return $result;
 }
-$data = CallAPI('GET', 'https://api.binance.com/api/v3/ticker/price');
 
-print_r($data);
+$dataResp = json_decode(CallAPI('GET', 'https://api.binance.com/api/v3/ticker/price'));
+$number = 10000000;
+if (is_array($dataResp) || is_object($dataResp))
+{
+	$arrObj;
+	$table = "<table border=\"1\"><tr><th>Coin</th><th>PCT</th><th>Volume</th><th>Closed Price</th><th>Last Price</th><th> % </th></tr>";
+	$tr = '';
+	foreach ($dataResp as $value) {
+		if (endsWith($value->symbol, "BTC")) {
+			$tr = '<tr><td>'.$value->symbol.'</td>';
+			$closed = '';
+			$percent = '';
+			$p = 0;
+			if(isset($_SESSION[$value->symbol.'_data']) && isset($_SESSION[$value->symbol.'_date'])) {
+				$closed = '<td>'.$_SESSION[$value->symbol.'_date'].'</td><td>'.$_SESSION[$value->symbol.'_vol'].'</td><td>'.$_SESSION[$value->symbol.'_data'].'</td>';
+				
+				if(floatval($value->price) > floatval($_SESSION[$value->symbol.'_data'])) {
+					$p = round(((floatval($value->price)*$number - floatval($_SESSION[$value->symbol.'_data'])*$number) * 100 / floatval($_SESSION[$value->symbol.'_data']))/$number, 2);
+					$percent = '<td><font color="green">'.$p.'</font></td>';
+				} elseif (floatval($value->price) < floatval($_SESSION[$value->symbol.'_data'])){
+					$p = -1 * round(((floatval($_SESSION[$value->symbol.'_data'])*$number - floatval($value->price)*$number) * 100 / floatval($_SESSION[$value->symbol.'_data']))/$number, 2);
+					$alert = '';
+					if ($p < -10) {
+						$alert = ' !!!!';
+					}
+					$percent = '<td><font color="red">'.$p.$alert.'</font></td>';
+				} else {
+					$percent = '<td>0</td>';
+					
+				}
+			}
+			$tr = $tr.$closed.'<td>'.$value->price.'</td>'.$percent.'</tr>';
+			
+			$object = (object) [
+				'tr' => $tr,
+				'p'=> $p
+			];
+			$arrObj[] = $object;
+		}
+		
+	}
+	usort($arrObj, "cmp");
+	foreach ($arrObj as $obj) {
+		$table = $table.$obj->tr;
+	}
+	
+	$table = $table."</table>";
+	echo $table;
+} else if(is_string($dataResp))
+{
+	echo $dataResp;
+} else echo "invalid";
+//print_r($data);
 ?>
