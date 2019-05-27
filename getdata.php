@@ -61,14 +61,15 @@ $number = 10000000;
 if (is_array($dataResp) || is_object($dataResp))
 {
 	$arrObj;
-	$table = "<table border=\"1\"><tr><th>Coin</th><th>PCT</th><th>Volume</th><th>Closed Price</th><th>Last Price</th><th> % </th></tr>";
+	$table = "<table cellspacing=\"0\"><tr><th>Coin</th><th>PCT</th><th>Volume</th><th>Closed Price</th><th>Last Price</th><th> % </th><th> Buy </th><th> Sell </th></tr>";
 	$tr = '';
 	foreach ($dataResp as $value) {
 		if (endsWith($value->symbol, "BTC")) {
-			$tr = '<tr><td>'.$value->symbol.'</td>';
+			$tr = '<tr><td><a target="blank" href="https://www.binance.com/vn/trade/'.str_replace('BTC', '_BTC', $value->symbol).'">'.$value->symbol.'</a></td>';
 			$closed = '';
 			$percent = '';
 			$p = 0;
+			$buysell = '<td></td><td></td>';
 			if(isset($_SESSION[$value->symbol.'_data']) && isset($_SESSION[$value->symbol.'_date'])) {
 				$closed = '<td>'.$_SESSION[$value->symbol.'_date'].'</td><td>'.$_SESSION[$value->symbol.'_vol'].'</td><td>'.$_SESSION[$value->symbol.'_data'].'</td>';
 				
@@ -78,8 +79,9 @@ if (is_array($dataResp) || is_object($dataResp))
 				} elseif (floatval($value->price) < floatval($_SESSION[$value->symbol.'_data'])){
 					$p = -1 * round(((floatval($_SESSION[$value->symbol.'_data'])*$number - floatval($value->price)*$number) * 100 / floatval($_SESSION[$value->symbol.'_data']))/$number, 2);
 					$alert = '';
-					if ($p < -10) {
-						$alert = ' !!!!';
+					if ($p <= -10) {
+						$buysell = '<td>'.$_SESSION[$value->symbol.'_buy'].'</td>'.'<td>'.$_SESSION[$value->symbol.'_sell'].'</td>';
+						$alert = '<span class="alert"></span>';
 					}
 					$percent = '<td><font color="red">'.$p.$alert.'</font></td>';
 				} else {
@@ -87,7 +89,7 @@ if (is_array($dataResp) || is_object($dataResp))
 					
 				}
 			}
-			$tr = $tr.$closed.'<td>'.$value->price.'</td>'.$percent.'</tr>';
+			$tr = $tr.$closed.'<td>'.$value->price.'</td>'.$percent.$buysell.'</tr>';
 			
 			$object = (object) [
 				'tr' => $tr,
