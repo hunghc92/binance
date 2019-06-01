@@ -1,49 +1,5 @@
+<?php include 'common-function.php';?>
 <?php
-session_start();
-date_default_timezone_set('Europe/London');
-
-function CallAPI($method, $url, $data = false)
-{
-    $curl = curl_init();
-
-    switch ($method)
-    {
-        case "POST":
-            curl_setopt($curl, CURLOPT_POST, 1);
-
-            if ($data)
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-            break;
-        case "PUT":
-            curl_setopt($curl, CURLOPT_PUT, 1);
-            break;
-        default:
-            if ($data)
-                $url = sprintf("%s?%s", $url, http_build_query($data));
-    }
-
-    // Optional Authentication:
-    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($curl, CURLOPT_USERPWD, "username:password");
-
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-
-    $result = curl_exec($curl);
-
-    curl_close($curl);
-
-    return $result;
-}
-
-function getDecimal($value) {
-	$rs = '0.';
-	for ($i = 0; $i < (8 - strlen($value)); $i++) {
-		$rs = $rs.'0';
-	}
-	$rs = $rs.$value;
-	return $rs;
-}
 
 function initSymbolData() {
 	$date = new DateTime(null);
@@ -51,40 +7,51 @@ function initSymbolData() {
 	$minute = $date->format('i');
 	$startTime = 0;
 	$hour = 6;
-	$startTime = $date->getTimestamp()-(60+$minute)*60-$date->format('s');
+	$startTime = $date->getTimestamp()-(120+$minute)*60-$date->format('s');
+	
+	$btcData = json_decode(CallAPI('GET', 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'));
+	$btcPrice = floatval($btcData->price);
+	echo $btcPrice;
 	
 	//session_unset();
 	
 	if (!isset($_SESSION['symbolTimestam']) || $_SESSION['symbolTimestam'] != $startTime) {
-		$symbolStr = 'ETHBTC,LTCBTC,BNBBTC,NEOBTC,BCCBTC,GASBTC,HSRBTC,MCOBTC,WTCBTC,LRCBTC,QTUMBTC,YOYOBTC,OMGBTC,ZRXBTC,STRATBTC,SNGLSBTC,BQXBTC,KNCBTC,FUNBTC,SNMBTC,IOTABTC,LINKBTC,XVGBTC,SALTBTC,MDABTC,MTLBTC,SUBBTC,EOSBTC,SNTBTC,ETCBTC,MTHBTC,ENGBTC,DNTBTC,ZECBTC,BNTBTC,ASTBTC,DASHBTC,OAXBTC,ICNBTC,BTGBTC,EVXBTC,REQBTC,VIBBTC,TRXBTC,POWRBTC,ARKBTC,XRPBTC,MODBTC,ENJBTC,STORJBTC,VENBTC,KMDBTC,RCNBTC,NULSBTC,RDNBTC,XMRBTC,DLTBTC,AMBBTC,BATBTC,BCPTBTC,ARNBTC,GVTBTC,CDTBTC,GXSBTC,POEBTC,QSPBTC,BTSBTC,XZCBTC,LSKBTC,TNTBTC,FUELBTC,MANABTC,BCDBTC,DGDBTC,ADXBTC,ADABTC,PPTBTC,CMTBTC,XLMBTC,CNDBTC,LENDBTC,WABIBTC,TNBBTC,WAVESBTC,GTOBTC,ICXBTC,OSTBTC,ELFBTC,AIONBTC,NEBLBTC,BRDBTC,EDOBTC,WINGSBTC,NAVBTC,LUNBTC,TRIGBTC,APPCBTC,VIBEBTC,RLCBTC,INSBTC,PIVXBTC,IOSTBTC,CHATBTC,STEEMBTC,NANOBTC,VIABTC,BLZBTC,AEBTC,RPXBTC,NCASHBTC,POABTC,ZILBTC,ONTBTC,STORMBTC,XEMBTC,WANBTC,WPRBTC,QLCBTC,SYSBTC,GRSBTC,CLOAKBTC,GNTBTC,LOOMBTC,BCNBTC,REPBTC,TUSDBTC,ZENBTC,SKYBTC,CVCBTC,THETABTC,IOTXBTC,QKCBTC,AGIBTC,NXSBTC,DATABTC,SCBTC,NPXSBTC,KEYBTC,NASBTC,MFTBTC,DENTBTC,ARDRBTC,HOTBTC,VETBTC,DOCKBTC,POLYBTC,PHXBTC,HCBTC,GOBTC,PAXBTC,RVNBTC,DCRBTC,USDCBTC,MITHBTC,BCHABCBTC,BCHSVBTC,RENBTC,BTTBTC,ONGBTC,FETBTC,CELRBTC,MATICBTC,ATOMBTC,PHBBTC,TFUELBTC';
+		//$symbolStr = 'ETHBTC,LTCBTC,BNBBTC,NEOBTC,GASBTC,MCOBTC,WTCBTC,LRCBTC,QTUMBTC,YOYOBTC,OMGBTC,ZRXBTC,STRATBTC,SNGLSBTC,BQXBTC,KNCBTC,FUNBTC,SNMBTC,IOTABTC,LINKBTC,XVGBTC,MDABTC,MTLBTC,,EOSBTC,SNTBTC,ETCBTC,MTHBTC,ENGBTC,DNTBTC,ZECBTC,BNTBTC,ASTBTC,DASHBTC,OAXBTC,BTGBTC,EVXBTC,REQBTC,VIBBTC,TRXBTC,POWRBTC,ARKBTC,XRPBTC,ENJBTC,STORJBTC,,KMDBTC,RCNBTC,NULSBTC,RDNBTC,XMRBTC,DLTBTC,AMBBTC,BATBTC,BCPTBTC,ARNBTC,GVTBTC,CDTBTC,GXSBTC,POEBTC,QSPBTC,BTSBTC,XZCBTC,LSKBTC,TNTBTC,FUELBTC,MANABTC,BCDBTC,DGDBTC,ADXBTC,ADABTC,PPTBTC,CMTBTC,XLMBTC,CNDBTC,LENDBTC,WABIBTC,TNBBTC,WAVESBTC,GTOBTC,ICXBTC,OSTBTC,ELFBTC,AIONBTC,NEBLBTC,BRDBTC,EDOBTC,NAVBTC,LUNBTC,APPCBTC,VIBEBTC,RLCBTC,INSBTC,PIVXBTC,IOSTBTC,STEEMBTC,NANOBTC,VIABTC,BLZBTC,AEBTC,NCASHBTC,POABTC,ZILBTC,ONTBTC,STORMBTC,XEMBTC,WANBTC,WPRBTC,QLCBTC,SYSBTC,GRSBTC,,GNTBTC,LOOMBTC,REPBTC,ZENBTC,SKYBTC,CVCBTC,THETABTC,IOTXBTC,QKCBTC,AGIBTC,NXSBTC,DATABTC,SCBTC,NPXSBTC,KEYBTC,NASBTC,MFTBTC,DENTBTC,ARDRBTC,HOTBTC,VETBTC,DOCKBTC,POLYBTC,HCBTC,GOBTC,RVNBTC,DCRBTC,MITHBTC,BCHABCBTC,,RENBTC,BTTBTC,ONGBTC,FETBTC,CELRBTC,MATICBTC,ATOMBTC,PHBBTC,TFUELBTC';
+		$symbolStr = 'ETHBTC,LTCBTC,BNBBTC,NEOBTC,GASBTC,BTCUSDT,ETHUSDT,MCOBTC,WTCBTC,LRCBTC,QTUMBTC,YOYOBTC,OMGBTC,ZRXBTC,STRATBTC,SNGLSBTC,BQXBTC,KNCBTC,FUNBTC,SNMBTC,IOTABTC,LINKBTC,XVGBTC,MDABTC,MTLBTC,,EOSBTC,SNTBTC,ETCBTC,MTHBTC,ENGBTC,DNTBTC,ZECBTC,BNTBTC,ASTBTC,DASHBTC,OAXBTC,BTGBTC,EVXBTC,REQBTC,VIBBTC,TRXBTC,POWRBTC,ARKBTC,XRPBTC,ENJBTC,STORJBTC,BNBUSDT,,KMDBTC,RCNBTC,NULSBTC,RDNBTC,XMRBTC,DLTBTC,AMBBTC,BATBTC,BCPTBTC,ARNBTC,GVTBTC,CDTBTC,GXSBTC,NEOUSDT,POEBTC,QSPBTC,BTSBTC,XZCBTC,LSKBTC,TNTBTC,FUELBTC,MANABTC,BCDBTC,DGDBTC,ADXBTC,ADABTC,PPTBTC,CMTBTC,XLMBTC,CNDBTC,LENDBTC,WABIBTC,LTCUSDT,TNBBTC,WAVESBTC,GTOBTC,ICXBTC,OSTBTC,ELFBTC,AIONBTC,NEBLBTC,BRDBTC,EDOBTC,NAVBTC,LUNBTC,APPCBTC,VIBEBTC,RLCBTC,INSBTC,PIVXBTC,IOSTBTC,STEEMBTC,NANOBTC,VIABTC,BLZBTC,AEBTC,NCASHBTC,POABTC,ZILBTC,ONTBTC,STORMBTC,QTUMUSDT,XEMBTC,WANBTC,WPRBTC,QLCBTC,SYSBTC,GRSBTC,ADAUSDT,,GNTBTC,LOOMBTC,XRPUSDT,REPBTC,ZENBTC,SKYBTC,EOSUSDT,CVCBTC,THETABTC,TUSDUSDT,IOTAUSDT,XLMUSDT,IOTXBTC,QKCBTC,AGIBTC,NXSBTC,DATABTC,ONTUSDT,TRXUSDT,ETCUSDT,ICXUSDT,SCBTC,NPXSBTC,KEYBTC,NASBTC,MFTBTC,DENTBTC,ARDRBTC,NULSUSDT,HOTBTC,VETBTC,VETUSDT,DOCKBTC,POLYBTC,HCBTC,GOBTC,PAXUSDT,RVNBTC,DCRBTC,MITHBTC,BCHABCBTC,,BCHABCUSDT,RENBTC,USDCUSDT,LINKUSDT,WAVESUSDT,BTTBTC,BTTUSDT,USDSUSDT,ONGBTC,ONGUSDT,HOTUSDT,ZILUSDT,ZRXUSDT,FETBTC,FETUSDT,BATUSDT,XMRUSDT,ZECUSDT,IOSTUSDT,CELRBTC,CELRUSDT,DASHUSDT,NANOUSDT,OMGUSDT,THETAUSDT,ENJUSDT,MITHUSDT,MATICBTC,MATICUSDT,ATOMBTC,ATOMUSDT,PHBBTC,TFUELBTC,TFUELUSDT';
 		$symbolList = explode(',', $symbolStr);
 		
-		$btcData = json_decode(CallAPI('GET', 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'));
-		$btcPrice = floatval($btcData->price);
+		$numberAds = 100000000;
+		
+		$_SESSION['symbolTimestam'] = $startTime;
 		foreach ($symbolList as $symbol) {
-			
-			$_SESSION['symbolTimestam'] = $startTime;
-
-			$url = 'https://www.binance.com/api/v1/klines?symbol='.$symbol.'&interval=1h&startTime='.$startTime.'000'.'&limit=1';
+			$url = 'https://www.binance.com/api/v1/klines?symbol='.$symbol.'&interval=1h&startTime='.$startTime.'000';
 			//echo $url.'-----';
 			$dataResp = json_decode(CallAPI('GET', $url));
 
 			$date = new DateTime();
+			$idx = 1;
+			$prvPrice = 0;
 			foreach ($dataResp as $item) {
-
-				$date->setTimestamp($item[6]/1000 + ($hour*60*60));
-				
-				$_SESSION[$symbol.'_data'] = $item[4];
-				$_SESSION[$symbol.'_date'] = $date->format('d/m/Y H:i:s');
-				
-				$dayVol = json_decode(CallAPI('GET', 'https://api.binance.com/api/v1/ticker/24hr?symbol='.$symbol));
-				$volBTC = $dayVol->quoteVolume;
-				$_SESSION[$symbol.'_vol'] = round(floatval($volBTC), 2);
-				// round(floatval($item[5])/$btcPrice, 2);
-				$buy = (round((floatval($item[4])*100000000 - floatval($item[4])*100000000*15/100), 0)).'';
-				$sell = (round((floatval($item[4])*100000000 - floatval($item[4])*100000000*12/100), 0)).'';
-				$_SESSION[$symbol.'_buy'] = getDecimal($buy);
-				$_SESSION[$symbol.'_sell'] = getDecimal($sell);
+				if ($idx == 1) {
+					$prvPrice = floatval($item[4])*$numberAds;
+				} elseif ($idx == 2) {
+					$date->setTimestamp($item[6]/1000 + ($hour*60*60));
+					
+					$dayVol = json_decode(CallAPI('GET', 'https://api.binance.com/api/v1/ticker/24hr?symbol='.$symbol));
+					if ($dayVol != null) {
+						$_SESSION[$symbol.'_data'] = $item[4];
+						$_SESSION[$symbol.'_prvPercent'] = round((floatval($item[4])*$numberAds-$prvPrice)*100/$prvPrice, 2);
+						$_SESSION[$symbol.'_date'] = $date->format('d/m/Y H:i:s');
+						$volBTC = $dayVol->quoteVolume;
+						$_SESSION[$symbol.'_vol'] = round(floatval($volBTC), 2);
+						// round(floatval($item[5])/$btcPrice, 2);
+						$buy = (round((floatval($item[4])*100000000 - floatval($item[4])*100000000*15/100), 0)).'';
+						$sell = (round((floatval($item[4])*100000000 - floatval($item[4])*100000000*12/100), 0)).'';
+						$_SESSION[$symbol.'_buy'] = getDecimal($buy);
+						$_SESSION[$symbol.'_sell'] = getDecimal($sell);
+					}
+				}
+				$idx++;
 			}
 			
 			
